@@ -17,4 +17,4 @@ FROM tomcat:latest
 WORKDIR /usr/local/tomcat/webapps
 
 # Copy the WAR file generated in the previous stage into the Tomcat webapps directory
-COPY --from=builder /app/build/libs/*.war .
+COPY --from=builder /app/build/libs/demo-0.0.1-SNAPSHOT.war .
