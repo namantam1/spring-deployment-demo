@@ -1,28 +1,20 @@
 # Stage 1: Build the Java project with Gradle
-FROM gradle:jdk17 AS builder
+FROM openjdk:17-jdk-alpine AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy only the Gradle build files
-COPY build.gradle settings.gradle /app/
-COPY gradle /app/gradle
-COPY src /app/src
+# Copy the entire project directory into the container
+COPY . .
 
-# Build the project
-RUN gradle build --no-daemon
+# Run the Gradle build command to compile the source code and generate artifacts
+RUN ./gradlew build -x test
 
-# Stage 2: Create a minimal Java runtime image
-FROM openjdk:17-jdk-alpine
+# Stage 2: Create a minimal Tomcat image and deploy the WAR file
+FROM tomcat:latest
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /usr/local/tomcat/webapps
 
-# Copy the built JAR file from the previous stage
-COPY --from=builder /app/build/libs/*.jar /app/app.jar
-
-# Expose the port that the Spring Boot application runs on
-EXPOSE 8080
-
-# Command to run the Spring Boot application when the container starts
-CMD ["java", "-jar", "app.jar"]
+# Copy the WAR file generated in the previous stage into the Tomcat webapps directory
+COPY --from=builder /app/build/libs/*.war .
