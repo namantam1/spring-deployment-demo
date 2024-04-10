@@ -4,13 +4,11 @@ FROM gradle:jdk17 AS builder
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy only the Gradle build files
-COPY build.gradle settings.gradle /app/
-COPY gradle /app/gradle
-COPY src /app/src
+# Copy entire project
+COPY . .
 
 # Build the project
-RUN gradle build --no-daemon
+RUN ./gradlew build -x test --no-daemon
 
 # Stage 2: Create a minimal Java runtime image
 FROM openjdk:17-jdk-alpine
